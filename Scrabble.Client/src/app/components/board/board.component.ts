@@ -2,6 +2,7 @@ import {Component, HostListener} from '@angular/core';
 import {NgForOf} from "@angular/common";
 import {MatGridList, MatGridTile} from "@angular/material/grid-list";
 import {MatButton} from "@angular/material/button";
+import {GameService} from "../../services/game.service";
 
 @Component({
   selector: 'app-board',
@@ -19,7 +20,7 @@ export class BoardComponent {
   activeField?: ScrabbleField;
   grid: ScrabbleField[][];
 
-  constructor() {
+  constructor(private gameService: GameService) {
     this.grid = Array.from({length: 15}, () => Array.from({length: 15}));
     // Initialize the grid with X as the value for each field
     for (let row = 0; row < 15; row++) {
@@ -33,6 +34,10 @@ export class BoardComponent {
         };
       }
     }
+
+    this.gameService.onLetterChange().subscribe(letterChange => {
+      this.grid[letterChange.row][letterChange.col].value = letterChange.value;
+    })
   }
 
   selectCell(cell: ScrabbleField) {
@@ -44,6 +49,8 @@ export class BoardComponent {
   }
 
   commitWord() {
+    this.gameService.joinGame('TEST', 'Player 1');
+
     this.activeField = undefined;
     this.grid.forEach(row => row.forEach(cell => cell.committedValue = cell.value));
   }
@@ -105,7 +112,10 @@ export class BoardComponent {
     }
 
     this.activeField.value = letter;
+    this.gameService.placeLetter(this.activeField.row, this.activeField.col, letter);
   }
+
+
 }
 
 const tripleWordFlatIndexes = [0, 7, 14, 105, 119, 210, 217, 224];

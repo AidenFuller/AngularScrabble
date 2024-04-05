@@ -2,5 +2,5 @@ namespace Scrabble.Server.Models;
 
 public class BoardServiceConfiguration
 {
-    public int SessionTimeoutInMinutes { get; set; }
+    public int SessionTimeoutInMinutes { get; set; } = 10;
 }

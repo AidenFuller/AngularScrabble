@@ -4,7 +4,7 @@ public class Board
 {
     public Cell[][] Cells { get; }
     public int Size { get; }
-    
+
     public Board(int size)
     {
         Size = size;
