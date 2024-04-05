@@ -1,0 +1,51 @@
+.cell {
+  color: black;
+  cursor: pointer;
+  border: 1px solid black;
+  background-color: beige;
+}
+
+.grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(15, 1fr);
+  padding: 5px;
+  user-select: none;
+}
+
+.selected {
+  background-color: deepskyblue !important;
+}
+
+.value {
+  font-size: 1.5em;
+  font-weight: bold;
+  text-align: center;
+  width: 100%;
+  aspect-ratio: 1/1;
+  position: relative;
+  background-color: beige;
+  display: grid;
+  align-items: center;
+  margin: 5px;
+}
+
+.new {
+  background-color: orange !important;
+}
+
+.doubleletter {
+  background-color: plum;
+}
+
+.tripleletter {
+  background-color: lightblue;
+}
+
+.doubleword {
+  background-color: lightgreen;
+}
+
+.tripleword {
+  background-color: lightcoral;
+}

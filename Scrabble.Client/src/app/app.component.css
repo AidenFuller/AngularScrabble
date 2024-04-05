@@ -1,0 +1,11 @@
+main {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+
+}
+
+.section {
+  width: 50%;
+  padding: 20px;
+}

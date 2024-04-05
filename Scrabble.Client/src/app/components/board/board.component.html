@@ -1,0 +1,45 @@
+<!-- Create a 9x9 grid of divs -->
+<!--<div class="grid">
+  <ng-container class="row" *ngFor="let row of grid">
+    <div class="cell"
+         [class.doubleletter]="cell.multiplier === 'DL'"
+         [class.tripleletter]="cell.multiplier === 'TL'"
+         [class.doubleword]="cell.multiplier === 'DW'"
+         [class.tripleword]="cell.multiplier === 'TW'"
+         [class.selected]="this.activeField === cell"
+
+         (click)="selectCell(cell)"
+         *ngFor="let cell of row">
+        <div class="value"
+             [class.doubleletter]="cell.multiplier === 'DL'"
+             [class.tripleletter]="cell.multiplier === 'TL'"
+             [class.doubleword]="cell.multiplier === 'DW'"
+             [class.tripleword]="cell.multiplier === 'TW'">
+          {{ cell.value }}
+        </div>
+    </div>
+  </ng-container>
+</div>-->
+
+<mat-grid-list class="grid" cols="15">
+  <mat-grid-tile *ngFor="let cell of grid.flat()"
+                 [colspan]="1"
+                 [rowspan]="1"
+                 class="cell"
+                 [class.new]="cell.committedValue !== cell.value && this.activeField !== cell"
+                 [class.selected]="this.activeField === cell"
+                 [class.doubleletter]="cell.multiplier === 'DL'"
+                 [class.tripleletter]="cell.multiplier === 'TL'"
+                 [class.doubleword]="cell.multiplier === 'DW'"
+                 [class.tripleword]="cell.multiplier === 'TW'"
+                 (click)="selectCell(cell)">
+    <div class="value"
+         [class.doubleletter]="cell.multiplier === 'DL'"
+         [class.tripleletter]="cell.multiplier === 'TL'"
+         [class.doubleword]="cell.multiplier === 'DW'"
+         [class.tripleword]="cell.multiplier === 'TW'">
+      {{ cell.value }}
+    </div>
+  </mat-grid-tile>
+</mat-grid-list>
+<button mat-button (click)="commitWord()">Submit</button>
