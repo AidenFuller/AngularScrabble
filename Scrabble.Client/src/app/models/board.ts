@@ -1,16 +1,17 @@
 export interface Board {
   size: number;
-  cells: Cell[];
+  cells: Cell[][];
 }
 
 export interface Cell {
+  value: string | null;
+  committedValue: string | null;
+  multiplier?: Multiplier;
   row: number;
   col: number;
-  value?: string;
-  multiplier: Multiplier;
 }
 
-export type Multiplier = 'None' | 'DoubleLetter' | 'TripleLetter' | 'DoubleWord' | 'TripleWord';
+export type Multiplier = 'DL' | 'TL' | 'DW' | 'TW' | null;
 
 export interface Result {
     isSuccess: boolean;
@@ -18,13 +19,18 @@ export interface Result {
 }
 
 export interface TypedResult<T> {
-  result: T;
+  value?: T;
   isSuccess: boolean;
   message: string;
+}
+
+const typedResult: TypedResult<void> = {
+  isSuccess: true,
+  message: 'Success'
 }
 
 export interface LetterChange {
   row: number;
   col: number;
-  value: string | null;
+  value: string;
 }

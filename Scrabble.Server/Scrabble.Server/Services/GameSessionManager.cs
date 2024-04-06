@@ -29,16 +29,38 @@ public class GameSessionManager
         return Result.Ok(!gameSession.IsGameInProgress);
     }
 
-    public Result JoinGameSession(string sessionKey, string playerName)
+    public bool TryGetPlayerConnectionForSession(string sessionKey, string playerName, out string? connectionId)
+    {
+        connectionId = null;
+        if (!_gameSessionsByKey.TryGetValue(sessionKey, out var gameSession))
+            return false;
+
+        connectionId = gameSession.Players.FirstOrDefault(x => x.PlayerName == playerName)?.ConnectionId;
+        return connectionId != null;
+    }
+
+    public Result<Board> JoinGameSession(string sessionKey, string playerName, string connectionId)
     {
         if (!_gameSessionsByKey.TryGetValue(sessionKey, out var gameSession))
-            return Result.Fail($"Cannot find session with key: {sessionKey}");
+            return Result.Fail<Board>($"Cannot find session with key: {sessionKey}");
 
         if (gameSession.IsGameInProgress)
-            return Result.Fail("Game is already in progress");
+            return Result.Fail<Board>("Game is already in progress");
 
-        gameSession.Players.Add(new Player(playerName));
-        return Result.Ok();
+        var player = gameSession.Players.FirstOrDefault(x => x.PlayerName == playerName);
+        if (player == null)
+        {
+            gameSession.Players.Add(new(playerName)
+            {
+                ConnectionId = connectionId
+            });
+        }
+        else
+        {
+            player.ConnectionId = connectionId;
+        }
+
+        return Result.Ok(gameSession.Board);
     }
 
     public Result StartGame(string sessionKey)
@@ -57,6 +79,20 @@ public class GameSessionManager
         return Result.Ok();
     }
 
+    public Result ClearLetter(string sessionKey, int x, int y)
+    {
+        if (!_gameSessionsByKey.TryGetValue(sessionKey, out var gameSession))
+            return Result.Fail($"Cannot find session with key: {sessionKey}");
+
+        // if (!gameSession.IsGameInProgress)
+        //     return Result.Fail("Game is not in progress");
+
+        var cell = gameSession.Board.Cells[x][y];
+        cell.Value = null;
+
+        return Result.Ok();
+    }
+
     public Result PlaceLetter(string sessionKey, int x, int y, string letter)
     {
         if (!_gameSessionsByKey.TryGetValue(sessionKey, out var gameSession))
@@ -66,27 +102,28 @@ public class GameSessionManager
         //     return Result.Fail("Game is not in progress");
 
         var cell = gameSession.Board.Cells[x][y];
-        cell.Letter = letter;
-        cell.IsCommitted = false;
+        cell.Value = letter;
 
         return Result.Ok();
     }
 
-    public Result CommitWord(string sessionKey)
+    public Result<(Board Board, int Score)> CommitWord(string sessionKey)
     {
         if (!_gameSessionsByKey.TryGetValue(sessionKey, out var gameSession))
-            return Result.Fail<bool>($"Cannot find session with key: {sessionKey}");
+            return Result.Fail<(Board Board, int Score)>($"Cannot find session with key: {sessionKey}");
 
         if (!gameSession.IsGameInProgress)
-            return Result.Fail<bool>("Game is not in progress");
+            return Result.Fail<(Board Board, int Score)>("Game is not in progress");
 
-        var result = _boardValidator.IsBoardValid(gameSession.Board, gameSession.CurrentPlayer.Letters.ToArray());
+        var result = _boardValidator.TryValidateBoard(gameSession.Board, gameSession.CurrentPlayer.Letters.ToArray());
         if (!result.IsSuccess)
-            return result;
+            return Result.Fail<(Board Board, int Score)>(result.Message);
 
-        gameSession.Board.GetAllCells().ToList().ForEach(x => x.IsCommitted = true);
+        var score = _boardService.ScoreAllWords(gameSession.Board);
+
+        gameSession.Board.GetAllCells().ToList().ForEach(x => x.CommittedValue = x.Value);
         gameSession.NextPlayer();
 
-        return Result.Ok();
+        return Result.Ok((gameSession.Board, score));
     }
 }

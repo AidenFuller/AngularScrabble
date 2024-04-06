@@ -3,6 +3,8 @@ using Scrabble.Server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+//builder.Configuration.SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json", optional: false);
+
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -12,8 +14,8 @@ builder.Services.AddSingleton<BoardService>();
 builder.Services.AddSingleton<DictionaryLookupService>();
 builder.Services.AddSingleton<IBoardValidator, BoardValidator>();
 builder.Services.AddSingleton<GameSessionManager>();
-builder.Services.AddSingleton<BoardServiceConfiguration>();
-builder.Services.Configure<BoardServiceConfiguration>(builder.Configuration.GetSection("BoardService"));
+builder.Services.Configure<BoardServiceConfiguration>(builder.Configuration.GetSection("Board"));
+builder.Services.AddOptions<BoardServiceConfiguration>();
 
 builder.Services.AddCors(options =>
 {

@@ -5,7 +5,7 @@ public class Board
     public Cell[][] Cells { get; }
     public int Size { get; }
 
-    public Board(int size)
+    public Board(int size, Dictionary<(int Row, int Col), string> multipliers)
     {
         Size = size;
         Cells = new Cell[size][];
@@ -14,7 +14,8 @@ public class Board
             Cells[i] = new Cell[size];
             for (var j = 0; j < size; j++)
             {
-                Cells[i][j] = new Cell();
+                var multiplier = multipliers.GetValueOrDefault((i, j));
+                Cells[i][j] = new Cell(i, j, multiplier);
             }
         }
     }

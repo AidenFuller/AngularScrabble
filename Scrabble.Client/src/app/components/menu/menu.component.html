@@ -1,0 +1,13 @@
+Join or Create a Session
+<mat-form-field appearance="outline">
+    <mat-label>Session Key</mat-label>
+    <input matInput [(ngModel)]="this.sessionKey" />
+</mat-form-field>
+<mat-form-field appearance="outline">
+    <mat-label>Player Name</mat-label>
+    <input matInput [(ngModel)]="this.playerName" />
+</mat-form-field>
+{{this.latestScore}}
+<button mat-button (click)="onJoinClick()">Join Session</button>
+<button mat-button (click)="commitWord()">Commit Word</button>
+<button mat-button (click)="startGame()">Start Game</button>
