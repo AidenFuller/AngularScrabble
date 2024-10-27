@@ -31,7 +31,7 @@ public static class BoardExtensions
         return cells.ToArray();
     }
 
-    public static (int Row, int Col) GetCellPosition(this Board board, Cell cell)
+    public static Point GetCellPosition(this Board board, Cell cell)
     {
         for (var row = 0; row < board.Size; row++)
         {
@@ -39,7 +39,7 @@ public static class BoardExtensions
             {
                 if (board.Cells[row][col] == cell)
                 {
-                    return (row, col);
+                    return new Point(row, col);
                 }
             }
         }

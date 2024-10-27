@@ -23,10 +23,9 @@ public class GameSessionManager
 
     public Result<bool> CanJoinGameSession(string sessionKey)
     {
-        if (!_gameSessionsByKey.TryGetValue(sessionKey, out var gameSession))
-            return Result.Ok(true);
-
-        return Result.Ok(!gameSession.IsGameInProgress);
+        return !_gameSessionsByKey.TryGetValue(sessionKey, out var gameSession)
+            ? Result.Ok(true)
+            : Result.Ok(!gameSession.IsGameInProgress);
     }
 
     public bool TryGetPlayerConnectionForSession(string sessionKey, string playerName, out string? connectionId)
@@ -50,7 +49,7 @@ public class GameSessionManager
         var player = gameSession.Players.FirstOrDefault(x => x.PlayerName == playerName);
         if (player == null)
         {
-            gameSession.Players.Add(new(playerName)
+            gameSession.Players.Add(new Player(playerName)
             {
                 ConnectionId = connectionId
             });
@@ -79,20 +78,6 @@ public class GameSessionManager
         return Result.Ok();
     }
 
-    public Result ClearLetter(string sessionKey, int x, int y)
-    {
-        if (!_gameSessionsByKey.TryGetValue(sessionKey, out var gameSession))
-            return Result.Fail($"Cannot find session with key: {sessionKey}");
-
-        // if (!gameSession.IsGameInProgress)
-        //     return Result.Fail("Game is not in progress");
-
-        var cell = gameSession.Board.Cells[x][y];
-        cell.Value = null;
-
-        return Result.Ok();
-    }
-
     public Result PlaceLetter(string sessionKey, int x, int y, string letter)
     {
         if (!_gameSessionsByKey.TryGetValue(sessionKey, out var gameSession))
@@ -117,7 +102,7 @@ public class GameSessionManager
 
         var result = _boardValidator.TryValidateBoard(gameSession.Board, gameSession.CurrentPlayer.Letters.ToArray());
         if (!result.IsSuccess)
-            return Result.Fail<(Board Board, int Score)>(result.Message);
+            return Result.Fail<(Board Board, int Score)>(result.Message!);
 
         var score = _boardService.ScoreAllWords(gameSession.Board);
 
@@ -125,5 +110,12 @@ public class GameSessionManager
         gameSession.NextPlayer();
 
         return Result.Ok((gameSession.Board, score));
+    }
+    
+    public Result<bool> IsPlayersTurn(string sessionKey, string contextConnectionId)
+    {
+        return !_gameSessionsByKey.TryGetValue(sessionKey, out var gameSession)
+            ? Result.Fail<bool>($"Cannot find session with key: {sessionKey}")
+            : Result.Ok(gameSession.CurrentPlayer.ConnectionId == contextConnectionId);
     }
 }

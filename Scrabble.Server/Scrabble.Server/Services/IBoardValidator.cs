@@ -8,16 +8,9 @@ public interface IBoardValidator
     Result<List<string>> TryValidateBoard(Board board, string[] availableLetters);
 }
 
-public class BoardValidator : IBoardValidator
+public class BoardValidator(DictionaryLookupService dictionaryLookupService) : IBoardValidator
 {
-    private readonly DictionaryLookupService _dictionaryLookupService;
-    private readonly BoardService _boardService;
-
-    public BoardValidator(DictionaryLookupService dictionaryLookupService, BoardService boardService)
-    {
-        _dictionaryLookupService = dictionaryLookupService ?? throw new ArgumentNullException(nameof(dictionaryLookupService));
-        _boardService = boardService ?? throw new ArgumentNullException(nameof(boardService));
-    }
+    private readonly DictionaryLookupService _dictionaryLookupService = dictionaryLookupService ?? throw new ArgumentNullException(nameof(dictionaryLookupService));
 
     public Result<List<string>> TryValidateBoard(Board board, string[] availableLetters)
     {
@@ -33,7 +26,7 @@ public class BoardValidator : IBoardValidator
         if (!AreLettersConnectedTogether(board))
             return Result.Fail<List<string>>("All letters must be connected together");
 
-        var words = _boardService.GetAllCreatedWords(board).Select(x => x.Value).ToList();
+        var words = BoardService.GetAllCreatedWords(board).Select(x => x.Value).ToList();
 
         if (!words.All(_dictionaryLookupService.IsValidWord))
             return Result.Fail<List<string>>("All words must be in the dictionary");
@@ -48,12 +41,12 @@ public class BoardValidator : IBoardValidator
 
         foreach (var letter in uncommittedLetters)
         {
-            if (!availableLettersCounts.ContainsKey(letter.Value))
+            if (!availableLettersCounts.ContainsKey(letter.Value!))
             {
                 return false;
             }
-            availableLettersCounts[letter.Value]--;
-            if (availableLettersCounts[letter.Value] < 0)
+            availableLettersCounts[letter.Value!]--;
+            if (availableLettersCounts[letter.Value!] < 0)
             {
                 return false;
             }
@@ -84,9 +77,9 @@ public class BoardValidator : IBoardValidator
         if (cellCoordinates.Select(x => x.Row).Distinct().Count() == 1) // Horizontal
         {
             var row = cellCoordinates.First().Row;
-            var columns = cellCoordinates.Select(x => x.Col).ToList();
-            var start = cellCoordinates.Min(x => x.Col);
-            var end = cellCoordinates.Max(x => x.Col);
+            var columns = cellCoordinates.Select(point => point.Column).ToList();
+            var start = cellCoordinates.Min(point => point.Column);
+            var end = cellCoordinates.Max(point => point.Column);
 
             for (int column = start; column <= end; column++)
             {
@@ -100,10 +93,10 @@ public class BoardValidator : IBoardValidator
         return true;
     }
 
-    private bool IsInLine(Board board)
+    private static bool IsInLine(Board board)
     {
         var uncommittedCells = board.GetAllCells().Where(x => !x.IsCommitted());
         var cellCoordinates = uncommittedCells.Select(board.GetCellPosition).ToList();
-        return cellCoordinates.Select(x => x.Row).Distinct().Count() == 1 || cellCoordinates.Select(x => x.Col).Distinct().Count() == 1;
+        return cellCoordinates.Select(x => x.Row).Distinct().Count() == 1 || cellCoordinates.Select(x => x.Column).Distinct().Count() == 1;
     }
 }

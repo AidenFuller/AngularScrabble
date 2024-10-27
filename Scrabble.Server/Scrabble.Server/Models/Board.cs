@@ -5,17 +5,18 @@ public class Board
     public Cell[][] Cells { get; }
     public int Size { get; }
 
-    public Board(int size, Dictionary<(int Row, int Col), string> multipliers)
+    public Board(int size, Dictionary<Point, MultiplierData> multipliers)
     {
         Size = size;
         Cells = new Cell[size][];
-        for (var i = 0; i < size; i++)
+        for (var row = 0; row < size; row++)
         {
-            Cells[i] = new Cell[size];
-            for (var j = 0; j < size; j++)
+            Cells[row] = new Cell[size];
+            for (var col = 0; col < size; col++)
             {
-                var multiplier = multipliers.GetValueOrDefault((i, j));
-                Cells[i][j] = new Cell(i, j, multiplier);
+                var point = new Point(row, col);
+                var multiplier = multipliers.GetValueOrDefault(point, new MultiplierData(MultiplierType.None, 1));
+                Cells[row][col] = new Cell(point, multiplier.Type, multiplier.Multiplier);
             }
         }
     }
